@@ -29,6 +29,11 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
+  if (req.accepts('json')) {
+    res.send({ error: 'Page not found' });
+    return;
+  }
+  res.render('error')
 });
 
 module.exports = app;
