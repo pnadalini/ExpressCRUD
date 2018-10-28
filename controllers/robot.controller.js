@@ -22,13 +22,13 @@ exports.createRobot = (async function (robot, callback) {
     removeIds(robot);
     // Validate if the received json is a robot
     const { error } = robotModel.validate(robot);
-
+    
     if (error) return callback(400, { error: error.details[0].message });
 
     // Connect to the database and insert the robot
     await client.connect();
     const db = client.db(dbName);
-
+    
     let response = await db.collection(collectionName).insertOne(robot);
     assert.equal(1, response.insertedCount);
     callback(null, robot);
@@ -65,7 +65,7 @@ exports.updateRobot = (async function (id, robot, callback) {
   try {
     removeIds(robot);
     // Validate if the received json is a robot
-    const { error } = robotModel.validate(robot);
+    const { error } = robotModel.optionalValidate(robot);
     if (error) return callback(400, { error: error.details[0].message });
 
     // Validate if there's an id for a specific robot and if that id is valid
