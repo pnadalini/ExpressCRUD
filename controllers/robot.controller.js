@@ -78,7 +78,6 @@ exports.updateRobot = (async function (id, robot, callback) {
     var response = await db.collection(collectionName).updateOne({ "_id": new ObjectID(id) }, { $set: robot });
     if (response) {
       assert.equal(1, response.matchedCount);
-      assert.equal(1, response.modifiedCount);
       callback(null, response);
     } else
       callback(404, { error: `The robot with id: '${id}' was not found` });
