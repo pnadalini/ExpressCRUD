@@ -4,7 +4,7 @@ const assert = require('assert');
 const robotModel = require('../models/robot.model');
 
 // Connection information
-const url = 'mongodb://localhost:27017/';
+const url = 'mongodb://mongo:27017/'; // local URL: 'mongodb://mongo:27017/';
 const dbName = 'robotDB';
 const collectionName = 'robotDome';
 

@@ -3,7 +3,7 @@ const redis = require('redis');
 const router = express.Router();
 
 const controller = require('../controllers/robot.controller');
-const client = redis.createClient();
+const client = redis.createClient({ "host": 'redis', "port": "6379" });
 const listKey = 'robotList';
 const singleKey = 'robotId=';
 
