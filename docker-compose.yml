@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 services:
   redis:
     image: redis
@@ -14,9 +14,16 @@ services:
     ports:
     - "27017:27017"
   api:
-    build: .
+    build: . #/ExpressCRUD -- Add this if used on root together with LabCrudRobots
     ports:
     - "3000:3000"
     depends_on:
     - mongo
     - redis
+  # Also add this if used on root together with LabCrudRobots
+  # web:
+  #   build: ./LabCrudRobots
+  #   ports:
+  #   - "8000:80"
+  #   links:
+  #   - api
