@@ -4,16 +4,14 @@ const assert = require('assert');
 const robotModel = require('../models/robot.model');
 
 // Connection information
-const url = 'mongodb://mongo:27017/'; // local URL: 'mongodb://mongo:27017/';
+const url = process.env.DB_URI || 'mongodb://localhost:27017/'; // Using mongo image: 'mongodb://mongo:27017/';
 const dbName = 'robotDB';
 const collectionName = 'robotDome';
-
-const idRegex = new RegExp("^[0-9a-fA-F]{24}$");
 
 function removeIds(robot) {
   // Remove ids set by the user
   delete robot.id;
-  delete robot._id;  
+  delete robot._id;
 }
 
 exports.createRobot = (async function (robot, callback) {
@@ -22,13 +20,13 @@ exports.createRobot = (async function (robot, callback) {
     removeIds(robot);
     // Validate if the received json is a robot
     const { error } = robotModel.validate(robot);
-    
-    if (error) return callback(400, { error: error.details[0].message });
+
+    if (error) return callback(404, { error: error.details[0].message });
 
     // Connect to the database and insert the robot
     await client.connect();
     const db = client.db(dbName);
-    
+
     let response = await db.collection(collectionName).insertOne(robot);
     assert.equal(1, response.insertedCount);
     callback(null, robot);
@@ -41,11 +39,7 @@ exports.createRobot = (async function (robot, callback) {
 exports.getRobots = (async function (id, callback) {
   const client = new MongoClient(url, { useNewUrlParser: true });
   try {
-    // Validate if there's an id for a specific robot and if that id is valid
-    if (id && !idRegex.test(id))
-      return callback(400, { error: `The specified id: '${id}' is not valid` });
-
-    // Connect to the database and insert the robot
+    // Connect to the database and get a specific robot or the whole list
     await client.connect();
     const db = client.db(dbName);
     var response = id ? await db.collection(collectionName).findOne({ "_id": new ObjectID(id) }) : await db.collection(collectionName).find({}).toArray();
@@ -66,11 +60,7 @@ exports.updateRobot = (async function (id, robot, callback) {
     removeIds(robot);
     // Validate if the received json is a robot
     const { error } = robotModel.optionalValidate(robot);
-    if (error) return callback(400, { error: error.details[0].message });
-
-    // Validate if there's an id for a specific robot and if that id is valid
-    if (id && !idRegex.test(id))
-      return callback(400, { error: `The specified id: '${id}' is not valid` });
+    if (error) return callback(404, { error: error.details[0].message });
 
     // Connect to the database and update the robot
     await client.connect();
@@ -91,16 +81,12 @@ exports.updateRobot = (async function (id, robot, callback) {
 exports.deleteRobot = (async function (id, callback) {
   const client = new MongoClient(url, { useNewUrlParser: true });
   try {
-    // Validate if there's an id for a specific robot and if that id is valid
-    if (id && !idRegex.test(id))
-      return callback(400, { error: `The specified id: '${id}' is not valid` });
-
     // Connect to the database and delete the robot
     await client.connect();
     const db = client.db(dbName);
     var response = await db.collection(collectionName).deleteOne({ "_id": new ObjectID(id) });
     if (response && response.deletedCount) {
-      assert.equal(1, response.deletedCount);      
+      assert.equal(1, response.deletedCount);
       callback(null, response);
     } else callback(404, { error: `The robot with id: '${id}' was not found` });
 
