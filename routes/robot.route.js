@@ -34,13 +34,13 @@ router.get('/:id?', (req, res) => {
 
   if (client && !client.connected) {
     // If redis is't connected get it directly from db
-    getRobots(req.params.id, res);
+    getRobots(req.params.id, res, redisKey);
   } else {
     // Verify if redis has the robot list or specific robot acording to the id
     client.get(redisKey, (error, result) => {
       if (error || !result) {
         // If there was no cache found, go to the database an retrieve the data
-        getRobots(req.params.id);
+        getRobots(req.params.id, res, redisKey);
       } else {
         // Return the result from cache      
         res.status(200).send(JSON.parse(result));
@@ -49,7 +49,7 @@ router.get('/:id?', (req, res) => {
   }
 });
 
-function getRobots(id, res) {
+async function getRobots(id, res, redisKey) {
   controller.getRobots(id, (errCode, data) => {
     if (!errCode && client && client.connected) {
       // Sets the response on redis with 10 minutes of life
